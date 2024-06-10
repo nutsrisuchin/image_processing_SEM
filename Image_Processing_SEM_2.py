@@ -3,6 +3,7 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
+from streamlit_cropper import st_cropper
 
 st.title("Red and Blue Area Percentage Calculator")
 
@@ -15,6 +16,14 @@ if uploaded_file is not None:
     image = cv2.imdecode(file_bytes, 1)
     image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
+    # Crop the image using streamlit_cropper
+    st.write("Crop the image to focus on the area of interest:")
+    cropped_image = st_cropper(Image.fromarray(image_rgb), realtime_update=True)
+
+    # Convert the cropped image back to an OpenCV image
+    cropped_image_np = np.array(cropped_image)
+    cropped_image_rgb = cv2.cvtColor(cropped_image_np, cv2.COLOR_RGB2BGR)
+
     # Define the color range for red and blue in RGB format
     lower_red = np.array([90, 0, 0])
     upper_red = np.array([255, 120, 120])
@@ -22,11 +31,11 @@ if uploaded_file is not None:
     upper_blue = np.array([100, 100, 255])
 
     # Create masks for red and blue areas
-    mask_red = cv2.inRange(image_rgb, lower_red, upper_red)
-    mask_blue = cv2.inRange(image_rgb, lower_blue, upper_blue)
+    mask_red = cv2.inRange(cropped_image_rgb, lower_red, upper_red)
+    mask_blue = cv2.inRange(cropped_image_rgb, lower_blue, upper_blue)
 
     # Calculate the area of each color
-    total_pixels = image.shape[0] * image.shape[1]
+    total_pixels = cropped_image_rgb.shape[0] * cropped_image_rgb.shape[1]
     red_area = np.sum(mask_red > 0)
     blue_area = np.sum(mask_blue > 0)
 
@@ -41,8 +50,8 @@ if uploaded_file is not None:
     # Display the original image and the masks
     fig, ax = plt.subplots(1, 3, figsize=(15, 5))
 
-    ax[0].imshow(image_rgb)
-    ax[0].set_title("Original Image")
+    ax[0].imshow(cv2.cvtColor(cropped_image_rgb, cv2.COLOR_BGR2RGB))
+    ax[0].set_title("Cropped Image")
     ax[0].axis('off')
 
     ax[1].imshow(mask_red, cmap='gray')
