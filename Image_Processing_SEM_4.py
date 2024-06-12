@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from PIL import Image
 from streamlit_cropper import st_cropper
 
-st.title("Red and Blue Area Percentage Calculator")
+st.title("์Hello, Red and Blue Area Percentage Calculator")
 
 # Upload the image
 uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png", "tif", "tiff"])
