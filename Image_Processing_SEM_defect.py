@@ -33,20 +33,22 @@ if uploaded_file is not None:
         cropped_image_gray = cv2.cvtColor(cropped_image_np, cv2.COLOR_RGB2GRAY)
 
         # Define a threshold to consider a pixel as dark/black
-        threshold = 50
+        threshold = st.slider("Select threshold for dark area detection", 0, 255, 165)
 
         # Create a mask for dark/black areas
-        mask_dark = cv2.inRange(cropped_image_gray, 0, threshold)
+        mask_dark = cropped_image_gray < threshold
 
         # Calculate the area of dark/black pixels
-        total_pixels = cropped_image_gray.shape[0] * cropped_image_gray.shape[1]
-        dark_area = np.sum(mask_dark > 0)
-
-        # Calculate the percentage of dark/black pixels
+        dark_area = np.sum(mask_dark)
+        total_pixels = cropped_image_gray.size
         dark_percentage = (dark_area / total_pixels) * 100
 
         # Display the results
         st.write(f"Dark/Black area percentage: {dark_percentage:.2f}%")
+
+        # Highlight dark areas on the original image
+        highlighted_image = cropped_image_np.copy()
+        highlighted_image[mask_dark] = [255, 0, 0]  # Highlight dark areas in red
 
         # Display the cropped image and the mask
         fig, ax = plt.subplots(1, 2, figsize=(10, 5))
@@ -55,10 +57,14 @@ if uploaded_file is not None:
         ax[0].set_title("Cropped Image")
         ax[0].axis('off')
 
-        ax[1].imshow(mask_dark, cmap='gray')
-        ax[1].set_title("Dark/Black Area Mask")
+        ax[1].imshow(highlighted_image)
+        ax[1].set_title("Highlighted Dark Areas")
         ax[1].axis('off')
 
         st.pyplot(fig)
     except Exception as e:
         st.error(f"An error occurred: {e}")
+
+
+
+
