@@ -22,6 +22,9 @@ if uploaded_file is not None:
         # Convert the PIL image to a NumPy array
         image_rgb = np.array(pil_image)
 
+        # Make a copy of the original image for cumulative crop display
+        highlighted_image = image_rgb.copy()
+
         # Let user set the number of crops
         num_crops = st.number_input("Number of crops", min_value=1, value=1, step=1)
 
@@ -30,7 +33,6 @@ if uploaded_file is not None:
         total_blue_area = 0
         total_cropped_pixels = 0  # Track total number of pixels in all cropped regions
 
-        # Iterate through each crop
         for i in range(num_crops):
             st.write(f"Crop the image to focus on the area of interest (Crop {i+1}):")
             cropped_image = st_cropper(pil_image, realtime_update=True, box_color="blue", key=f"cropper_{i}")
@@ -67,22 +69,13 @@ if uploaded_file is not None:
             st.write(f"Red area percentage for Crop {i+1}: {red_percentage_crop:.2f}%")
             st.write(f"Blue area percentage for Crop {i+1}: {blue_percentage_crop:.2f}%")
 
-            # Display the cropped image and the masks
-            fig, ax = plt.subplots(1, 3, figsize=(15, 5))
+            # Overlay red and blue areas on the highlighted image
+            cropped_mask_red = cv2.bitwise_and(cropped_image_np, cropped_image_np, mask=mask_red)
+            cropped_mask_blue = cv2.bitwise_and(cropped_image_np, cropped_image_np, mask=mask_blue)
 
-            ax[0].imshow(cropped_image_np)
-            ax[0].set_title(f"Cropped Image {i+1}")
-            ax[0].axis('off')
-
-            ax[1].imshow(mask_red, cmap='gray')
-            ax[1].set_title(f"Red Area Mask {i+1}")
-            ax[1].axis('off')
-
-            ax[2].imshow(mask_blue, cmap='gray')
-            ax[2].set_title(f"Blue Area Mask {i+1}")
-            ax[2].axis('off')
-
-            st.pyplot(fig)
+            # Overlay red and blue areas on the cumulative highlighted image
+            highlighted_image[mask_red > 0] = [255, 0, 0]  # Red areas
+            highlighted_image[mask_blue > 0] = [0, 0, 255]  # Blue areas
 
         # Calculate the overall percentages for red and blue areas across all crops
         overall_red_percentage = (total_red_area / total_cropped_pixels) * 100
@@ -92,6 +85,18 @@ if uploaded_file is not None:
         st.write(f"Total Red area percentage across all crops: {overall_red_percentage:.2f}%")
         st.write(f"Total Blue area percentage across all crops: {overall_blue_percentage:.2f}%")
 
+        # Display the original image and the highlighted image
+        fig, ax = plt.subplots(1, 2, figsize=(15, 7))
+
+        ax[0].imshow(image_rgb)
+        ax[0].set_title("Original Image")
+        ax[0].axis('off')
+
+        ax[1].imshow(highlighted_image)
+        ax[1].set_title("Highlighted Red and Blue Areas")
+        ax[1].axis('off')
+
+        st.pyplot(fig)
+
     except Exception as e:
         st.error(f"An error occurred: {e}")
-
