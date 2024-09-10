@@ -69,13 +69,14 @@ if uploaded_file is not None:
             st.write(f"Red area percentage for Crop {i+1}: {red_percentage_crop:.2f}%")
             st.write(f"Blue area percentage for Crop {i+1}: {blue_percentage_crop:.2f}%")
 
-            # Overlay red and blue areas on the highlighted image
-            cropped_mask_red = cv2.bitwise_and(cropped_image_np, cropped_image_np, mask=mask_red)
-            cropped_mask_blue = cv2.bitwise_and(cropped_image_np, cropped_image_np, mask=mask_blue)
+            # Find the coordinates of the cropped region in the original image
+            crop_box = cropped_image.getbbox()
 
-            # Overlay red and blue areas on the cumulative highlighted image
-            highlighted_image[mask_red > 0] = [255, 0, 0]  # Red areas
-            highlighted_image[mask_blue > 0] = [0, 0, 255]  # Blue areas
+            # Apply red and blue masks to the corresponding region of the original image
+            if crop_box:
+                x1, y1, x2, y2 = crop_box
+                highlighted_image[y1:y2, x1:x2][mask_red > 0] = [255, 0, 0]  # Red areas
+                highlighted_image[y1:y2, x1:x2][mask_blue > 0] = [0, 0, 255]  # Blue areas
 
         # Calculate the overall percentages for red and blue areas across all crops
         overall_red_percentage = (total_red_area / total_cropped_pixels) * 100
