@@ -47,9 +47,9 @@ if uploaded_file is not None:
     if "upper_red" not in st.session_state:
         st.session_state["upper_red"] = [180, 255, 255]
     if "lower_blue" not in st.session_state:
-        st.session_state["lower_blue"] = [100, 30, 0]
+        st.session_state["lower_blue"] = [80, 0, 100]
     if "upper_blue" not in st.session_state:
-        st.session_state["upper_blue"] = [170, 255, 255]
+        st.session_state["upper_blue"] = [160, 100, 255]
 
     # Helper function to create input boxes with labels, range validation, and unique keys
     def create_rgb_input_boxes(label, default_values, key_prefix=""):  

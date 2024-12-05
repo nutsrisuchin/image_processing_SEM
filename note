@@ -1,0 +1,6 @@
+git init   #initialize git
+git remote add origin https://github.com/nutsrisuchin/image_processing_SEM
+
+git add .   #add all files in the current path to github
+git commit -m "added"
+git push origin master
